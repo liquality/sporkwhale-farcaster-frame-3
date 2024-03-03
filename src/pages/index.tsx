@@ -9,10 +9,11 @@ import LeaderboardMobile from '../components/leaderboard-mobile'
 export default function Home() {
 
   const [isMobileState, setIsMobileState] = useState(false)
-  const [questionId, setQuestionId] = useState(4)
+  const [questionId, setQuestionId] = useState(5)
   const [leaderboard, setLeaderboard] = useState<null | ClashDataMap[]>(null)
   const [loading, setLoading] = useState(false)
   const [expandedDay, setExpandedDay] = useState<number | null>(null)
+  
   useEffect(() => {
     setIsMobileState(isMobile)
   }, [isMobile])
@@ -31,23 +32,29 @@ export default function Home() {
     }
   }, [leaderboard])
 
+  let image = ''
+  let postUrl = ''
+  let text = ''
+  if (questionId === 5) {
+    image = IMAGES.start_mint
+    postUrl = '/api/mint?data=start-mint'
+    text = '🔆 Mint your sporkwhale!'
+  } else {
+    image = IMAGES.welcome
+    postUrl = '/api/post?data=start'
+    text = '🔆 Play Clash of Channels!'
+  }
   return (
     <>
       <Head>
         <meta property="og:title" content="Frame" />
-        <meta property="og:image" content={`${SERVER_URL}/${IMAGES.welcome}`} />
+        <meta property="og:image" content={`${SERVER_URL}/${image}`} />
         <meta property="fc:frame" content="vNext" />
-        <meta
-          property="fc:frame:image"
-          content={`${SERVER_URL}/${IMAGES.welcome}`}
-        />
-        <meta
-          property="fc:frame:button:1"
-          content="🔆 Play Clash of Channels!"
-        />
+        <meta property="fc:frame:image" content={`${SERVER_URL}/${image}`} />
+        <meta property="fc:frame:button:1" content={text} />
         <meta
           property="fc:frame:post_url"
-          content={`${SERVER_URL}/api/post?data=start`}
+          content={`${SERVER_URL}${postUrl}`}
         />
       </Head>
       {leaderboard ? (

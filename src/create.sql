@@ -89,3 +89,9 @@ add
     column options json NOT null default '[]' :: json;
 
 create index idx_questions_id_expires ON questions (id, expires_at);
+
+
+alter table
+    users
+add
+    column has_minted BOOLEAN DEFAULT false;

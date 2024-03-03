@@ -3,6 +3,7 @@ import { generateFarcasterFrame, SERVER_URL } from './generate-frames'
 import { TUntrustedData } from '../types'
 import { IMAGES, levelImages } from './image-paths'
 import { getAddrByFid } from './neynar-api'
+import { mintSporkNFT } from './contract-operations'
 const QUESTION_ID = parseInt(process.env.QUESTION_ID || '')
 export async function saveUserQuestionResponse(
   ud: TUntrustedData,
@@ -58,10 +59,17 @@ export async function saveUser(ud: TUntrustedData) {
   } else return existingUser.rows[0]
 }
 
+export async function setUserHasMinted(id: number): Promise<void> {
+  const update = await sql`
+  UPDATE users 
+  set has_minted = true 
+  where id = ${id}`
+  console.log('setUserHasMinted => ', update )
+}
+
 export async function getChannel(channel: string) {
   const existingChannel =
     await sql`SELECT * FROM channels WHERE name = ${channel}`
-  console.log(existingChannel, 'channel:', channel)
   return existingChannel.rows[0]
 }
 
@@ -76,6 +84,69 @@ export async function getQuestionFromId(questionId: number) {
   AND expires_at::timestamp  > current_timestamp;
   `
   return question.rows.length > 0 ? question.rows[0] : null
+}
+
+export async function getUserFromFid(fid: number) {
+  const user = await sql`
+  SELECT * FROM users
+  WHERE fid = ${fid}
+ ;
+  `
+  return user.rows.length > 0 ? user.rows[0] : null
+}
+
+export async function checkIfAvailableForMintAndMint(
+  fid: number,
+  channelName: string
+): Promise<string> {
+  let html = ''
+  const checkIfUserHasParticipatedInChannelQuizQuery = await sql`SELECT EXISTS (
+    SELECT 1
+    FROM user_question_responses AS uqr
+    JOIN channels AS c ON uqr.channel_id = c.id
+    JOIN users AS u ON uqr.user_id = u.id
+    WHERE u.fid = ${fid}              -- Use user's fid instead of user_id
+    AND c.name = ${channelName}       -- Filter by channel name
+);
+`
+  const userHasParticipatedInQuiz =
+    checkIfUserHasParticipatedInChannelQuizQuery.rows[0]
+
+  if (userHasParticipatedInQuiz.exists) {
+    const channel = await getChannel(channelName)
+    console.log(channel, 'got here because I have participated')
+    const user = await getUserFromFid(fid)
+    if (user) {
+      if (!user.has_minted) {
+        mintSporkNFT(user.wallet_address, channel.question_id)
+          .then((tx) => {
+            console.log(tx, 'calling setUserHasMinted: ', user.id)
+            setUserHasMinted(user.id)
+          })
+          .catch((error) => {
+            console.error('Error:', error)
+            // Handle errors if necessary
+          })
+        html = generateFarcasterFrame(
+          `${SERVER_URL}/${channel.question_id + '_successfull_mint.png'}`,
+          'leaderboard'
+        )
+      } else {
+        html = generateFarcasterFrame(
+          `${SERVER_URL}/${IMAGES.already_minted}`,
+          'leaderboard'
+        )
+      }
+    }
+  } else {
+    console.log('user has not participated in channel:', channelName)
+
+    html = generateFarcasterFrame(
+      `${SERVER_URL}/${IMAGES.not_eligable}`,
+      'leaderboard'
+    )
+  }
+  return html
 }
 
 export async function getChannelStats(channel: QueryResultRow) {

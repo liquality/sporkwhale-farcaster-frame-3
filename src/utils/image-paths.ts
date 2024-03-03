@@ -8,12 +8,17 @@ export const IMAGES = {
   question: `${QUESTION_ID}_question.png`,
   winning: `${QUESTION_ID}_winning.png`,
   losing: `${QUESTION_ID}_losing.png`,
+  successfull_mint: `${QUESTION_ID}_successfull_mint.png`,
+  mint: `${QUESTION_ID}_mint.png`,
 
   //Generic, these images are the same regardless of day
   error: 'error.png',
   already_submitted: 'already_submitted.png',
   be_a_follower: 'be_a_follower.png',
   expired: 'expired.png',
+  not_eligable: 'not_eligable.png',
+  already_minted: 'already_claimed.png',
+  start_mint: 'start-mint.png',
 }
 
 export const levelImages: LevelImages = {

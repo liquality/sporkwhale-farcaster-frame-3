@@ -47,7 +47,10 @@ export default function LeaderboardMobile(props: LeaderboardProps) {
           </>
         )}
         <div className="winner-box">
-          <br></br>Clash-of-Channels Winner: <br></br>Revealed on March 3rd
+          <br></br>Clash-of-Channels Winner: <br></br>
+          <div style={{
+            fontSize: 24
+          }}>mfers</div>
         </div>
       </div>
     </div>

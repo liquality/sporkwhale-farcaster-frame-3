@@ -26,7 +26,6 @@ export async function getChannelFromCastHash(
       throw new Error('Network response was not ok')
     }
     const data = await resp.json()
-    console.log(data.cast, 'data cast')
 
     if (data.cast.parent_url) {
       let parentUrl = data.cast.parent_url

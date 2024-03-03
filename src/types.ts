@@ -31,6 +31,8 @@ export type TPostData =
   | 'correct-or-incorrect'
   | 'leaderboard'
   | 'error-be-a-follower'
+  | 'start-mint'
+  | 'mint'
 
 export type TUserProfileNeynar = {
   object: 'user'
